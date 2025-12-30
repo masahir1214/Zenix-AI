@@ -11,7 +11,7 @@ import smtplib
 from email.mime.text import MIMEText
 
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app)
 my_api_key = os.getenv("Google_API_key") 
 genai.configure(api_key=my_api_key)
@@ -177,4 +177,5 @@ def feedback():
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=9000, debug=True)
     
+
 
