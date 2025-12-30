@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenix AI Assistant</title>
+    <link rel="stylesheet" href="../static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-robot"></i>
+                    <h1>Zenix AI</h1>
+                </div>
+                <div class="status-indicator">
+                    <div class="status-dot online"></div>
+                    <span>Online</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Chat Interface -->
+        <main class="main-content">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h2>ZENIX AI</h2>
+                    <p>Need Assistance? ZENIX is here to Help!</p>
+                </div>
+
+                <!-- Chat Messages -->
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message assistant-message">
+                        <div class="message-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <p>Hello! I'm Zenix, your personal AI assistant. How can I help you today?</p>
+                            <span class="message-time">Just now</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <form id="chatForm" class="input-area">
+                    <div class="input-container">
+                        <input type="text" id="messageInput" name="message" placeholder="Type your message here..." required>
+                        <button type="submit" class="send-btn" title="Send Message">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                        <button type="button" id="mic-btn" class="mic-btn" title="Use Microphone">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Quick Actions -->
+                                <div class="quick-actions">
+                    <button id="feedbackBtn" class="quick-action-btn">
+                        <i class="fas fa-comment-alt"></i>
+                        Feedback
+                    </button>
+                    <button id="howToUseBtn" class="quick-action-btn">
+                        <i class="fas fa-question-circle"></i>
+                        How to Use
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy;Zenix AI Assistant. Created by Masahir.</p>
+        </footer>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div id="feedbackModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Submit Feedback</h2>
+            <form id="feedbackForm">
+                <textarea id="feedbackText" placeholder="Your feedback..." required></textarea>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- How to Use Modal -->
+    <div id="howToUseModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>How to Use Zenix AI</h2>
+            <p>Welcome to Zenix AI! Here's how to get started:</p>
+            <ul>
+                <li><strong>Chat:</strong> Type your message in the input box or use Voice Button to Command (Supports both English and Urdu).</li>
+                <li><strong>Open Website:</strong> Just say "[Website Name] search kro/open kro" to Open Websites </li>
+                <li><strong>Note:</strong> Zenix is in its early stages so it may contain errors. Please use <strong>Feedback button</strong> to <strong>Submit Feedback Anonymously</strong> about any Error or Suggestion.</li>
+            </ul>
+        </div>
+    </div>
+
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Zenix is thinking...</p>
+        </div>
+    </div>
+
+    <script>
+        // Minimal JavaScript for form handling and UI updates
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatForm = document.getElementById('chatForm');
+            const messageInput = document.getElementById('messageInput');
+            const chatMessages = document.getElementById('chatMessages');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const micBtn = document.getElementById('mic-btn');
+            const feedbackModal = document.getElementById('feedbackModal');
+            const closeBtns = document.querySelectorAll('.close-btn');
+
+            // Show feedback modal
+            feedbackBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                feedbackModal.style.display = 'flex';
+            });
+
+            // Show How to Use modal
+            howToUseBtn.addEventListener('click', () => {
+                howToUseModal.style.display = 'flex';
+            });
+
+            // Close modals when the close button is clicked
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    feedbackModal.style.display = 'none';
+                    howToUseModal.style.display = 'none';
+                });
+            });
+
+            // Close modals when clicking outside of them
+            window.addEventListener('click', (e) => {
+                if (e.target == feedbackModal) {
+                    feedbackModal.style.display = 'none';
+                }
+                if (e.target == howToUseModal) {
+                    howToUseModal.style.display = 'none';
+                }
+            });
+
+            // Handle feedback form submission
+            feedbackForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const feedbackText = document.getElementById('feedbackText').value;
+                
+                try {
+                    const response = await fetch('/api/feedback', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ feedback: feedbackText }),
+                    });
+
+                    if (response.ok) {
+                        alert('Feedback submitted successfully!');
+                        feedbackModal.style.display = 'none';
+                    } else {
+                        alert('Failed to submit feedback.');
+                    }
+                } catch (error) {
+                    console.error('Error submitting feedback:', error);
+                    alert('An error occurred. Please try again.');
+                }
+            });
+
+            // Speech Recognition
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            let recognition;
+            let isListening = false;
+
+            function startRecognitionLoop() {
+                if (!isListening) return;
+
+                recognition = new SpeechRecognition();
+                recognition.continuous = false; // Process single utterances
+                recognition.lang = 'en-US';
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                recognition.addEventListener('result', (event) => {
+                    const transcript = Array.from(event.results)
+                        .map(result => result[0])
+                        .map(result => result.transcript)
+                        .join('');
+                    
+                    if (transcript) {
+                        messageInput.value = transcript;
+                        sendMessage(transcript);
+                    }
+                });
+
+                recognition.addEventListener('end', () => {
+                    // If still in listening mode, restart recognition.
+                    // This creates the continuous effect.
+                    if (isListening) {
+                        startRecognitionLoop();
+                    }
+                });
+
+                recognition.addEventListener('error', (event) => {
+                    console.error('Speech recognition error:', event.error);
+                });
+
+                recognition.start();
+            }
+
+            if (SpeechRecognition) {
+                micBtn.addEventListener('click', () => {
+                    isListening = !isListening;
+                    if (isListening) {
+                        micBtn.classList.add('recording');
+                        micBtn.title = "Listening... Click to stop";
+                        startRecognitionLoop();
+                    } else {
+                        micBtn.classList.remove('recording');
+                        micBtn.title = "Use Microphone";
+                        if (recognition) {
+                            recognition.stop();
+                        }
+                    }
+                });
+            } else {
+                micBtn.style.display = 'none';
+                console.log("Speech recognition not supported in this browser.");
+            }
+            
+            // Handle main chat form submission
+            chatForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await sendMessage(messageInput.value);
+                messageInput.value = '';
+            });
+
+            // Send message function
+            async function sendMessage(message) {
+                if (!message.trim()) return;
+
+                // Add user message to chat
+                addMessage(message, 'user');
+                
+                // Show loading
+                loadingOverlay.style.display = 'flex';
+
+                try {
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ message: message })
+                    });
+
+                    const data = await response.json();
+                    
+                    // Hide loading
+                    loadingOverlay.style.display = 'none';
+
+                    if (data.error) {
+                        addMessage(`Error: ${data.error}`, 'assistant');
+                    } else {
+                        addMessage(data.response, 'assistant');
+                        
+                        if (data.action === 'open_url' && data.url) {
+                            window.open(data.url, '_blank');
+                        }
+
+                        if (data.audio) {
+                            playAudio(data.audio);
+                        }
+                    }
+
+                } catch (error) {
+                    loadingOverlay.style.display = 'none';
+                    addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
+                }
+            }
+
+            // Add message to chat
+            function addMessage(text, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}-message`;
+                
+                const avatarDiv = document.createElement('div');
+                avatarDiv.className = 'message-avatar';
+                avatarDiv.innerHTML = sender === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                
+                const textP = document.createElement('p');
+                textP.textContent = text;
+                
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'message-time';
+                timeSpan.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                contentDiv.appendChild(textP);
+                contentDiv.appendChild(timeSpan);
+                
+                messageDiv.appendChild(avatarDiv);
+                messageDiv.appendChild(contentDiv);
+                
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function playAudio(audioData) {
+                const audio = new Audio("data:audio/mpeg;base64," + audioData);
+                audio.play();
+            }
+        });
+    </script>
+</body>
+</html>
+
