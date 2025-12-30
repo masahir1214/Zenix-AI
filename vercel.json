@@ -1,18 +1,5 @@
 {
-  "builds": [
-    {
-      "src": "Zenix.py",
-      "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "Zenix.py"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "Zenix.py"
-    }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "Zenix.py" }
   ]
 }
