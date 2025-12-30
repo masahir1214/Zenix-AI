@@ -174,8 +174,10 @@ def feedback():
         print(f"Error sending feedback: {e}")
         return jsonify({'error': f'Server error: {str(e)}'}), 500
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=9000, debug=True)
+'''if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=9000, debug=True)'''
+
     
+
 
 
